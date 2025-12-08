@@ -1,0 +1,36 @@
+model AIAnswerSummary {
+  id                String   @id @default(uuid()) @db.Uuid
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+  
+  // AI Analysis fields
+  topics             String[] // List of topics extracted for the response
+  sentiment         String   // Sentiment label (e.g., "POSITIVE", "NEGATIVE", "NEUTRAL")
+  extractedEntities Json     @default("[]") // Array of extracted entities with label, text, start, end
+  
+  // Relations
+  pollAnswerId      String     @map("poll_answer_id") @db.Uuid
+  voteId            String     @map("vote_id") @db.Uuid
+  pollAnswer        PollAnswer @relation(fields: [pollAnswerId], references: [id], onDelete: Cascade)
+  vote              Vote       @relation(fields: [voteId], references: [id], onDelete: Cascade)
+  
+  @@unique([pollAnswerId, voteId])
+  @@map("ai_answer_summaries")
+}
+
+model AIPostSummary {
+  id                String   @id @default(uuid()) @db.Uuid
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+  
+  // AI Analysis fields
+  topics             String[] // List of topics extracted for the post
+  sentiment         String   // Sentiment label (e.g., "POSITIVE", "NEGATIVE", "NEUTRAL")
+  extractedEntities Json     @default("[]") // Array of extracted entities with label, text, start, end
+  
+  // Relations
+  postId            String @unique @map("post_id") @db.Uuid
+  post              Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@map("ai_post_summaries")
+}

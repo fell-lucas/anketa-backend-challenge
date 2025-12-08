@@ -1,0 +1,24 @@
+model EmailTemplate {
+  id          String   @id @default(uuid()) @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  
+  // Template identification
+  name        String   @unique @db.VarChar(100) // e.g., "USER_SIGNUP", "PASSWORD_RESET"
+  subject     String   @db.VarChar(255) // Email subject line
+  
+  // Template content
+  textBody    String?  @map("text_body") @db.Text // Plain text version
+  htmlBody    String?  @map("html_body") @db.Text // HTML version
+  
+  // Template variables that can be replaced (for documentation)
+  variables   String[] @default([]) // e.g., ["userName", "appName", "resetLink"]
+  
+  // Metadata
+  description String?  @db.VarChar(500) // Description of when this template is used
+  isActive    Boolean  @default(true) @map("is_active") // Whether template is active
+  
+  @@map("email_templates")
+  @@index([name])
+  @@index([isActive])
+}

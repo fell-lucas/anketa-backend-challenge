@@ -1,0 +1,7 @@
+{
+  "extends": "@repo/tsconfig/app.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./"
+  }
+}

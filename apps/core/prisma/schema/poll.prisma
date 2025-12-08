@@ -1,0 +1,239 @@
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+}
+
+enum PostType {
+  POLL
+  SURVEY
+}
+
+enum PostVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum LinkResponseType {
+  NONE
+  SECTION
+  POLL
+}
+
+model PollOption {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  title     String   @db.VarChar(255)
+  content   String
+  media     Media[]  @relation(name: "PollOptionMedia")
+  pollId    String   @map("poll_id") @db.Uuid
+  poll      Poll     @relation(fields: [pollId], references: [id])
+
+  @@index([pollId])
+  @@map("poll_options")
+}
+
+enum QuestionType {
+  multipleChoice
+  twoSided
+  openEnded
+  ranking
+  single
+}
+
+enum AnswerType {
+  text
+  imageOrVideo
+  frequency
+  quality
+  agreement
+  familiarity
+  importance
+  satisfaction
+  yesOrNo
+  trueOrFalse
+  agreeOrDisagree
+}
+
+model Poll {
+  id                     String       @id @default(uuid()) @db.Uuid
+  createdAt              DateTime     @default(now()) @map("created_at")
+  updatedAt              DateTime     @default(now()) @updatedAt @map("updated_at")
+  questionType           QuestionType @map("question_type")
+  question               String
+  answerType             AnswerType   @map("answer_type")
+  hasMultipleAnswers     Boolean      @default(false) @map("has_multiple_answers")
+  // User can also add a free text as answer option
+  addOpenEndedOption     Boolean      @default(false) @map("add_open_ended_option")
+  // This Poll can be skipped
+  markAsOptionalQuestion Boolean      @default(false) @map("mark_as_optional_question")
+
+  answerCharacterLimit Int?    @map("answer_character_limit")
+  answerSuggestion     String? @map("answer_suggestion")
+
+  // Number of votes to this Poll
+  answersCount Int? @default(0) @map("answers_count")
+
+  // The section that the Poll belongs to
+  sectionId String?      @map("section_id") @db.Uuid
+  section   PostSection? @relation(name: "PollPostSection", fields: [sectionId], references: [id])
+
+  // Link this Poll (question) to other sections or Polls:
+  linkResponseType      LinkResponseType? @default(NONE) @map("link_response_type")
+  linkResponseSectionId String?           @map("link_response_section_id") @db.Uuid
+  linkResponseSection   PostSection?      @relation(name: "PollToPostSectionLink", fields: [linkResponseSectionId], references: [id])
+  linkResponsePollId    String?           @map("link_response_poll_id") @db.Uuid
+  linkResponsePoll      Poll?             @relation(name: "PollToPollLink", fields: [linkResponsePollId], references: [id])
+  linkResponseFromPolls Poll[]            @relation("PollToPollLink")
+
+  postId String @map("post_id") @db.Uuid
+  post   Post   @relation(fields: [postId], references: [id])
+
+  media Media[] @relation(name: "PollMedia")
+
+  options PollOption[]
+  answers PollAnswer[]
+  results PollResult[]
+
+  @@index([postId])
+  @@map("polls")
+}
+
+model Post {
+  id                        String         @id @default(uuid()) @db.Uuid
+  createdAt                 DateTime       @default(now()) @map("created_at")
+  updatedAt                 DateTime       @default(now()) @updatedAt @map("updated_at")
+  status                    PostStatus     @default(DRAFT)
+  isAnonymous               Boolean        @map("is_anonymous")
+  hasSensitiveContent       Boolean        @map("has_sensitive_content")
+  type                      PostType       @default(POLL)
+  visibility                PostVisibility @default(PUBLIC)
+  // Restrict selling this data:
+  restrictAccessToAnalytics Boolean        @default(false) @map("restrict_access_to_analytics")
+  name                      String?
+  description               String?
+  transactionHash           String?        @map("transaction_hash")
+  startsAt                  DateTime?      @map("starts_at")
+  endsAt                    DateTime?      @map("ends_at")
+
+  // Moderation fields
+  hiddenAt     DateTime? @map("hidden_at") // Marks the post as hidden; Result of a moderation action.
+  hiddenUntil  DateTime? @map("hidden_until") // If set, the post is hidden until this date/time. Just a reference, only `hiddenAt` is used to determine if the post is hidden.
+  hiddenReason String?   @map("hidden_reason") @db.Text // Reason for hiding the post.
+
+  // Number of ratings, total sum, and average rating for this Post
+  ratingsCount  Int   @default(0) @map("ratings_count")
+  ratingsSum    Int   @default(0) @map("ratings_sum")
+  ratingAverage Float @default(0) @map("rating_average")
+
+  media            Media[]           @relation(name: "PostMedia")
+  hashtags         String[]
+  likesCount       Int               @default(0) @map("likes_count")
+  commentsCount    Int               @default(0) @map("comments_count")
+  repostsCount     Int               @default(0) @map("reposts_count")
+  votesCount       Int               @default(0) @map("votes_count")
+  createdByUserId  String            @map("created_by_user_id") @db.Uuid
+  createdByUser    User              @relation(fields: [createdByUserId], references: [id])
+  channels         Channel[]
+  circles          Circle[]
+  comments         Comment[]
+  likes            Like[]
+  polls            Poll[]
+  reposts          Repost[]
+  postMutes        PostMute[]
+  votes            Vote[]
+  sections         PostSection[]
+  bookmarks        PostBookmark[]
+  notifications    Notification[]
+  aiSummary        AIPostSummary?
+  postRatings      PostRating[]
+
+  @@index([hiddenAt])
+  @@index([createdByUserId, type])
+  @@index([hashtags])
+  @@index([status, visibility, endsAt])
+  @@map("posts")
+}
+
+model Repost {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  comment   String?
+  userId    String   @map("user_id") @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+  likes     Like[]
+
+  @@index([userId])
+  @@index([postId])
+  @@map("reposts")
+}
+
+model Vote {
+  id                String       @id @default(uuid()) @db.Uuid
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @default(now()) @updatedAt @map("updated_at")
+  blockchainAddress String?      @map("blockchain_address")
+  transactionHash   String?      @map("transaction_hash")
+  postId            String       @map("post_id") @db.Uuid
+  userId            String       @map("user_id") @db.Uuid
+  answers           PollAnswer[]
+
+  post          Post              @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+  aiSummaries   AIAnswerSummary[]
+
+  @@index([postId])
+  @@index([userId])
+  @@map("votes")
+}
+
+model PollAnswer {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  content   String?
+  optionIds String?  @map("option_ids")
+  pollId    String   @map("poll_id") @db.Uuid
+  voteId    String   @map("vote_id") @db.Uuid
+
+  poll        Poll              @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  vote        Vote              @relation(fields: [voteId], references: [id], onDelete: Cascade)
+  aiSummaries AIAnswerSummary[]
+
+  @@index([pollId])
+  @@index([voteId])
+  @@map("poll_answers")
+}
+
+model PollResult {
+  id         String   @id @default(uuid()) @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+  votesCount Int      @default(0) @map("votes_count")
+  optionIds  String[] @map("option_ids")
+  pollId     String   @map("poll_id") @db.Uuid
+  poll       Poll     @relation(fields: [pollId], references: [id])
+
+  @@unique([pollId, optionIds])
+  @@map("poll_results")
+}
+
+model PostSection {
+  id                String   @id @default(uuid()) @db.Uuid
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  title             String
+  description       String
+  post              Post     @relation(fields: [postId], references: [id])
+  postId            String   @map("post_id") @db.Uuid
+  linkResponsePolls Poll[]   @relation("PollToPostSectionLink")
+  polls             Poll[]   @relation(name: "PollPostSection")
+
+  @@index([postId])
+  @@map("post_sections")
+}

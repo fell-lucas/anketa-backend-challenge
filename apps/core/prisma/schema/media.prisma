@@ -1,0 +1,37 @@
+model Media {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // File information
+  displayName String  @map("display_name") @db.VarChar(255)
+  publicId    String  @unique @map("public_id") @db.VarChar(255)
+  type        String  @map("type") // The use of the given image as in the MediaType enum
+  assetType   String? @map("asset_type") @db.VarChar(50) // image, video, raw, etc. - optional for links
+  format      String? @db.VarChar(50) // jpg, png, mp4, etc. - optional for links
+  secureUrl   String  @map("secure_url") @db.Text // For links, this is the URL
+
+  // Link specific fields
+  altText     String? @map("alt_text") @db.VarChar(255) // Alternative text for links
+  description String? @db.Text // Description for links
+
+  // Size information - all optional for links
+  sizeInBytes Int?   @map("size_in_bytes")
+  width       Int? // null for non-image/video and links
+  height      Int? // null for non-image/video and links
+  duration    Float? // null for non-video assets and links
+
+  // Cloudinary metadata and transformations
+  metadata Json? @db.JsonB // Store additional Cloudinary metadata
+
+  // Relations
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+
+  posts              Post[]       @relation("PostMedia")
+  pollOptions        PollOption[] @relation("PollOptionMedia")
+  userProfilePicture User[]       @relation("UserProfilePicture")
+  polls              Poll[]       @relation("PollMedia")
+
+  @@map("media")
+}

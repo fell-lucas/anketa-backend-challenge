@@ -1,0 +1,70 @@
+model Wallet {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  publicKey String   @map("public_key")
+  mnemonic  String   @map("mnemonic")
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  balance   Int      @default(0) @map("balance") // In uanketas
+
+  @@unique([userId])
+  @@map("wallets")
+}
+
+model ActivityType {
+  name           String   @id
+  minPoints      Int      @map("min_points")
+  maxPoints      Int      @map("max_points")
+  // Channels points to add to track interest:
+  channelsPoints Int      @map("channels_points")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  activityLogs UserActivityLog[]
+
+  @@map("activity_types")
+  @@index([name])
+}
+
+model UserActivityLog {
+  id             Int          @id @default(autoincrement())
+  userId         String       @map("user_id") @db.Uuid
+  user           User         @relation(fields: [userId], references: [id])
+  entityId       String?      @map("entity_id")
+  activity       String
+  activityType   ActivityType @relation(fields: [activity], references: [name])
+  points         Int
+  // Channels points interests: { [channelId]: points }
+  channelsPoints Json         @default("{}") @map("channels_points")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  @@map("user_activity_logs")
+  @@index([userId])
+  @@index([entityId])
+  @@index([createdAt, activity])
+}
+
+model TokenMinting {
+  id        String   @id @default(uuid()) @db.Uuid
+  winners   Json     @map("winners")
+  errors    Json     @map("errors")
+  amount    Int      @map("amount")
+  details   Json     @map("details") @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("token_minting")
+  @@index([createdAt])
+}
+model UserAwardedTokens {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  tokens    Int      @map("tokens")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("user_awarded_tokens")
+  @@index([userId])
+  @@index([createdAt])
+}

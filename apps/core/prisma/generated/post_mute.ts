@@ -1,0 +1,18 @@
+import { ApiProperty } from '@nestjs/swagger';
+
+export class PostMute {
+  @ApiProperty({ type: String })
+  id: string;
+
+  @ApiProperty({ type: Date })
+  createdAt: Date;
+
+  @ApiProperty({ type: Date })
+  updatedAt: Date;
+
+  @ApiProperty({ type: String })
+  userId: string;
+
+  @ApiProperty({ type: String })
+  postId: string;
+}

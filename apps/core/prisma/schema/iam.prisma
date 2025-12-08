@@ -1,0 +1,250 @@
+model User {
+  id                     String              @id @default(uuid()) @db.Uuid
+  createdAt              DateTime            @default(now()) @map("created_at")
+  updatedAt              DateTime            @default(now()) @updatedAt @map("updated_at")
+  name                   String              @db.VarChar(255)
+  username               String?             @unique @db.VarChar(255)
+  visibility             UserVisibilityEnum? @default(PUBLIC)
+  pinCode                String?             @db.VarChar(72) // Bcrypt hash of the pin code
+  bio                    String?             @db.VarChar(255)
+  gender                 String?             @db.VarChar(255)
+  dateOfBirth            DateTime?           @map("date_of_birth")
+  phoneNumber            String?             @unique @map("phone_number") @db.VarChar(20)
+  email                  String?             @unique @db.VarChar(255)
+  emailVerified          Boolean             @default(false) @map("email_verified")
+  profilePicturePublicId String?             @map("profile_picture_public_id")
+  profilePicture         Media?              @relation(name: "UserProfilePicture", fields: [profilePicturePublicId], references: [publicId])
+  latitude               Float?              @map("latitude")
+  longitude              Float?              @map("longitude")
+  city                   String?             @map("city")
+  country                String?             @map("country")
+  links                  String[]            @map("links")
+  firebaseUid            String?             @unique @map("firebase_uid")
+  googleUserId           String?             @unique @map("google_user_id") @db.VarChar(255)
+  googleToken            String?             @map("google_token") @db.VarChar(255)
+  appleUserId            String?             @unique @map("apple_user_id") @db.VarChar(255)
+  appleToken             String?             @map("apple_token") @db.VarChar(255)
+  streamToken            String?             @map("stream_token") @db.VarChar(255)
+  settingId              String?             @unique @map("setting_id") @db.Uuid
+  lastSeenAt             DateTime?           @map("last_seen_at")
+  deletedAt              DateTime?           @map("deleted_at")
+  willDeleteAt           DateTime?           @map("will_delete_at")
+  deleteReason           String?             @map("delete_reason") @db.Text
+
+  // Moderation fields
+  suspendedAt      DateTime? @map("suspended_at") // Marks the user as suspended (temporary or permanent)
+  suspendedUntil   DateTime? @map("suspended_until") // If set, indicates the date until which the user is suspended. Null means permanent suspension. This is just informative, the presense of suspendedAt is the only indicator of suspension.
+  suspensionReason String?   @map("suspension_reason") @db.Text // Optional reason for the suspension
+
+  userStats    UserStats?
+  userSettings UserSettings?
+
+  checkmarks                Checkmark[]
+  circleMemberships         CircleMembership[]
+  circles                   Circle[]
+  comments                  Comment[]
+  devices                   Device[]
+  followers                 Follow[]                   @relation("Followers")
+  following                 Follow[]                   @relation("Following")
+  likes                     Like[]
+  posts                     Post[]
+  reposts                   Repost[]
+  sessions                  Session[]
+  blockedBy                 UserBlock[]                @relation("BlockedBy")
+  blocking                  UserBlock[]                @relation("Blocking")
+  mutedBy                   UserMute[]                 @relation("MutedBy")
+  muting                    UserMute[]                 @relation("Muting")
+  wallets                   Wallet[]
+  media                     Media[]
+  phoneVerificationAttempts PhoneVerificationAttempt[]
+  channels                  Channel[]
+  postMutes                 PostMute[]
+  votes                     Vote[]
+  bookmarks                 PostBookmark[]
+  userProfileInformation    UserProfileInformation[]
+  receivedNotifications     Notification[]             @relation("ReceivedNotifications")
+  sentNotifications         Notification[]             @relation("SentNotifications")
+  userActivityLogs          UserActivityLog[]
+  postSearches              PostSearch[]
+  postRatings               PostRating[]
+  userAwardedTokens         UserAwardedTokens[]
+
+  @@index([suspendedAt])
+  @@map("users")
+}
+
+enum UserVisibilityEnum {
+  PUBLIC
+  PRIVATE
+}
+
+model UserStats {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // -> Live values:
+  //Wallet
+  points       Int       @default(0) @map("points")
+  totalPoints  Int       @default(0) @map("total_points")
+  lastTokenWin DateTime? @map("last_token_win")
+
+  // Stats
+  followersCount Int @default(0) @map("followers_count")
+  followeesCount Int @default(0) @map("followees_count")
+
+  // -> Periodically computed stats:
+  circlesCount              Int @default(0) @map("circles_count")
+  publishedPostsCount       Int @default(0) @map("published_posts_count")
+  publishedPollPostsCount   Int @default(0) @map("published_poll_posts_count")
+  publishedSurveyPostsCount Int @default(0) @map("published_survey_posts_count")
+  draftPostsCount           Int @default(0) @map("draft_posts_count")
+  scheduledPostsCount       Int @default(0) @map("scheduled_posts_count")
+  feedPostsCount            Int @default(0) @map("feed_posts_count") // Posts on which the user has interacted on (liked, reposted, commented, etc.). Cfr Darshan
+  purchasedPostsCount       Int @default(0) @map("purchased_posts_count")
+  likedPostsCount           Int @default(0) @map("liked_posts_count")
+  repostedPostsCount        Int @default(0) @map("reposted_posts_count")
+  bookmarkedPostsCount      Int @default(0) @map("bookmarked_posts_count")
+  votedPostsCount           Int @default(0) @map("voted_posts_count")
+
+  // Channels points: { [channelId]: points }
+  channelsPoints Json @default("{}") @map("channels_points")
+
+  user User @relation(fields: [id], references: [id])
+
+  @@map("user_stats")
+}
+
+model Admin {
+  id                         String                      @id @default(uuid()) @db.Uuid
+  createdAt                  DateTime                    @default(now()) @map("created_at")
+  updatedAt                  DateTime                    @default(now()) @updatedAt @map("updated_at")
+  name                       String                      @db.VarChar(255)
+  email                      String                      @unique @db.VarChar(255)
+  firebaseUid                String                      @unique @map("firebase_uid") @db.VarChar(255)
+  role                       String                      @db.VarChar(50) // owner, manager, editor, viewer
+  lastSeenAt                 DateTime?                   @map("last_seen_at")
+  devices                    Device[]
+  sessions                   Session[]
+
+  @@map("admins")
+}
+
+model Device {
+  id                     String    @id @default(uuid()) @db.Uuid
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @default(now()) @updatedAt @map("updated_at")
+  isDisabled             Boolean   @map("is_disabled")
+  type                   String?   @db.VarChar(255)
+  name                   String?   @db.VarChar(255)
+  userAgent              String    @map("user_agent") @db.VarChar(255)
+  platformDeviceId       String    @map("platform_device_id")
+  fcmToken               String?   @map("fcm_token")
+  lastSeenAt             DateTime? @map("last_seen_at")
+  lastSeenViaHttpAt      DateTime? @map("last_seen_via_http_at")
+  lastSeenViaWebsocketAt DateTime? @map("last_seen_via_websocket_at")
+  userId                 String?   @map("user_id") @db.Uuid
+  adminId                String?   @map("admin_id") @db.Uuid
+  user                   User?     @relation(fields: [userId], references: [id])
+  admin                  Admin?    @relation(fields: [adminId], references: [id])
+  sessions               Session[]
+
+  @@index([userId])
+  @@index([platformDeviceId])
+  @@map("devices")
+}
+
+model Session {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  createdAt                 DateTime                   @default(now()) @map("created_at")
+  updatedAt                 DateTime                   @default(now()) @updatedAt @map("updated_at")
+  lastSeenAt                DateTime?                  @map("last_seen_at")
+  expiresAt                 DateTime?                  @map("expires_at")
+  deviceId                  String                     @map("device_id") @db.Uuid
+  userId                    String?                    @map("user_id") @db.Uuid
+  adminId                   String?                    @map("admin_id") @db.Uuid
+  device                    Device                     @relation(fields: [deviceId], references: [id])
+  user                      User?                      @relation(fields: [userId], references: [id])
+  admin                     Admin?                     @relation(fields: [adminId], references: [id])
+  phoneVerificationAttempts PhoneVerificationAttempt[]
+
+  @@index([deviceId])
+  @@index([userId])
+  @@map("sessions")
+}
+
+enum SettingsVisibilityEnum {
+  EVERYONE
+  FOLLOWERS
+  NONE
+}
+
+model UserSettings {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Privacy Settings
+  whoCanSeeVotesOnMyPosts    SettingsVisibilityEnum @default(EVERYONE) @map("who_can_see_votes_on_my_posts")
+  whoCanSeeLikesOnMyPosts    SettingsVisibilityEnum @default(EVERYONE) @map("who_can_see_likes_on_my_posts")
+  whoCanSeeCommentsOnMyPosts SettingsVisibilityEnum @default(EVERYONE) @map("who_can_see_comments_on_my_posts")
+  whoCanTagMeInPosts         SettingsVisibilityEnum @default(EVERYONE) @map("who_can_tag_me_in_posts")
+  whoCanTagMeInComments      SettingsVisibilityEnum @default(EVERYONE) @map("who_can_tag_me_in_comments")
+  whoCanMessageMe            SettingsVisibilityEnum @default(EVERYONE) @map("who_can_message_me")
+  whoCanSeeMyFollowers       SettingsVisibilityEnum @default(EVERYONE) @map("who_can_see_my_followers")
+  whoCanSeeMyFollowees       SettingsVisibilityEnum @default(EVERYONE) @map("who_can_see_my_followees")
+
+  // Notification Preferences
+  emailNotifications Json @default("{ \"list\": [] }") @map("email_notifications")
+  pushNotifications  Json @default("{ \"list\": [] }") @map("push_notifications")
+
+  // Disclaimer Acceptance
+  disclaimers Json @default("{}") @map("disclaimers")
+
+  userId String @unique @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("user_settings")
+}
+
+model PhoneVerificationAttempt {
+  id           String   @id @default(uuid()) @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+  phone        String   @db.VarChar(20)
+  otp          String   @db.Char(6)
+  status       String   @db.Text
+  snsMessageId String   @map("sns_message_id") @db.Text
+  expiresAt    DateTime @map("expires_at")
+  sessionId    String?  @map("session_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  session      Session? @relation(fields: [sessionId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([phone])
+  @@map("phone_verification_attempts")
+}
+
+model UserProfileInformation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @unique @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+
+  data Json @default("{}")
+
+  @@map("user_profile_information")
+}
+
+model PlatformVariables {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  category String @db.VarChar(255)
+  name     String @unique @db.VarChar(255)
+  value    String @db.Text
+
+  @@map("platform_variables")
+}

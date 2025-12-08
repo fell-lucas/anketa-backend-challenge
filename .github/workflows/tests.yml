@@ -1,0 +1,48 @@
+on:
+  push:
+    branches: [production, staging, development, main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: true
+      max-parallel: 3 # run on 3 workers in parallel
+      matrix:
+        suite: [content, engadgement, iam, libraries, misc, admin]
+        shard: [1]
+        # Bigger suites need to be split into smaller shards:
+        include:
+          - suite: content
+            shard: [1, 2]
+          - suite: engadgement
+            shard: [1, 2]
+
+    name: ${{ matrix.suite }} tests${{ matrix.total_shards > 1 && format(' (shard {0}/{1})', matrix.shard, matrix.total_shards) || '' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate test env
+        run: pnpm dev:env
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Run ${{ matrix.suite }} tests
+        run: cd apps/core && pnpm test:ci src/${{ matrix.suite }}${{ matrix.total_shards > 1 && format(' --shard={0}/{1}', matrix.shard, matrix.total_shards) || '' }}
+        timeout-minutes: 20

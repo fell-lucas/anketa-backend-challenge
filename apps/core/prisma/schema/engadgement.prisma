@@ -1,0 +1,265 @@
+model Channel {
+  id              String    @id @default(uuid()) @db.Uuid
+  name            String
+  isEnabled       Boolean   @map("is_enabled")
+  iconPublicId    String?   @map("icon_public_id")
+  parentChannelId String?   @map("parent_channel_id") @db.Uuid
+  parentChannel   Channel?  @relation(name: "SubChannels", fields: [parentChannelId], references: [id])
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+  posts           Post[]
+  subChannels     Channel[] @relation("SubChannels")
+  users           User[]
+
+  @@map("channels")
+}
+
+model Checkmark {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  status    String   @db.VarChar(50) // pending, approved, rejected
+  type      String   @db.VarChar(50)
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("checkmarks")
+}
+
+model CircleMembership {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  status    String   @db.VarChar(50)
+  role      String   @db.VarChar(50)
+  circleId  String   @map("circle_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  circle    Circle   @relation(fields: [circleId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("circle_memberships")
+}
+
+model Circle {
+  id              String             @id @default(uuid()) @db.Uuid
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @default(now()) @updatedAt @map("updated_at")
+  isActive        Boolean            @map("is_active")
+  createdByUserId String             @map("created_by_user_id") @db.Uuid
+  createdByUser   User               @relation(fields: [createdByUserId], references: [id])
+  memberships     CircleMembership[]
+  posts           Post[]
+
+  @@map("circles")
+}
+
+model Comment {
+  id               String            @id @default(uuid()) @db.Uuid
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @default(now()) @updatedAt @map("updated_at")
+  content          String
+  userId           String            @map("user_id") @db.Uuid
+  postId           String            @map("post_id") @db.Uuid
+  parentCommentId  String?           @map("parent_comment_id") @db.Uuid
+  likesCount       Int               @default(0) @map("likes_count")
+  repliesCount     Int               @default(0) @map("replies_count")
+  user             User              @relation(fields: [userId], references: [id])
+  post             Post              @relation(fields: [postId], references: [id])
+  parentComment    Comment?          @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies          Comment[]         @relation("CommentReplies")
+  likes            Like[]
+  notifications    Notification[]
+
+  // Moderation fields
+  hiddenAt     DateTime? @map("hidden_at") // Marks the comment as hidden; Result of a moderation action.
+  hiddenUntil  DateTime? @map("hidden_until") // If set, the comment is hidden until this date/time. Just a reference, only `hiddenAt` is used to determine if the comment is hidden.
+  hiddenReason String?   @map("hidden_reason") @db.Text // Reason for hiding the comment.
+
+  @@index([hiddenAt])
+  @@index([userId])
+  @@index([postId, createdAt])
+  @@map("comments")
+}
+
+enum FollowStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Follow {
+  id            String         @id @default(uuid()) @db.Uuid
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at")
+  followerId    String         @map("follower_id") @db.Uuid
+  followeeId    String         @map("followee_id") @db.Uuid
+  follower      User           @relation("Following", fields: [followerId], references: [id])
+  followee      User           @relation("Followers", fields: [followeeId], references: [id])
+  status        FollowStatus   @default(PENDING)
+  notifications Notification[]
+
+  @@index([followerId])
+  @@index([followeeId])
+  @@map("follows")
+}
+
+model Like {
+  id            String         @id @default(uuid()) @db.Uuid
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at")
+  userId        String         @map("user_id") @db.Uuid
+  postId        String?        @map("post_id") @db.Uuid
+  repostId      String?        @map("repost_id") @db.Uuid
+  commentId     String?        @map("comment_id") @db.Uuid
+  user          User           @relation(fields: [userId], references: [id])
+  post          Post?          @relation(fields: [postId], references: [id])
+  repost        Repost?        @relation(fields: [repostId], references: [id])
+  comment       Comment?       @relation(fields: [commentId], references: [id])
+  notifications Notification[]
+
+  @@index([userId])
+  @@index([postId])
+  @@index([commentId])
+  @@index([repostId])
+  @@map("likes")
+}
+
+model UserBlock {
+  id           String   @id @default(uuid()) @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+  notes        String?  @db.VarChar(255)
+  userId       String   @map("user_id") @db.Uuid
+  targetUserId String   @map("target_user_id") @db.Uuid
+  user         User     @relation("Blocking", fields: [userId], references: [id])
+  targetUser   User     @relation("BlockedBy", fields: [targetUserId], references: [id])
+
+  @@index([userId])
+  @@index([targetUserId])
+  @@map("user_blocks")
+}
+
+model UserMute {
+  id           String   @id @default(uuid()) @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+  notes        String?  @db.VarChar(255)
+  userId       String   @map("user_id") @db.Uuid
+  targetUserId String   @map("target_user_id") @db.Uuid
+  user         User     @relation("Muting", fields: [userId], references: [id])
+  targetUser   User     @relation("MutedBy", fields: [targetUserId], references: [id])
+
+  @@index([userId])
+  @@index([targetUserId])
+  @@map("user_mutes")
+}
+
+model PostMute {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  userId    String   @map("user_id") @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+
+  @@index([userId])
+  @@index([postId])
+  @@map("post_mutes")
+}
+
+model PostBookmark {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  userId    String   @map("user_id") @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+
+  @@index([userId])
+  @@index([postId])
+  @@map("post_bookmarks")
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  VOTE
+  SUCCESSFUL_VOTE
+  FOLLOW
+  FOLLOW_REQUEST
+  FOLLOW_REQUEST_APPROVED
+  SCHEDULED_POST_CREATED
+  POST_CREATED_BLOCKCHAIN
+  WALLET_CREATED_BLOCKCHAIN
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  type   NotificationType
+  isRead Boolean          @default(false)
+
+  // User references
+  recipientId String @db.Uuid
+  recipient   User   @relation("ReceivedNotifications", fields: [recipientId], references: [id])
+
+  senderId String? @db.Uuid
+  sender   User?   @relation("SentNotifications", fields: [senderId], references: [id])
+
+  // Content references (use one based on notification type)
+  postId String? @db.Uuid
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  commentId String?  @db.Uuid
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  voteId String? @db.Uuid
+  vote   Vote?   @relation(fields: [voteId], references: [id], onDelete: Cascade)
+
+  followId String? @db.Uuid
+  follow   Follow? @relation(fields: [followId], references: [id], onDelete: Cascade)
+
+  likeId String? @db.Uuid
+  like   Like?   @relation(fields: [likeId], references: [id], onDelete: Cascade)
+
+  // Timestamps for failed vote notifications
+  failedAt DateTime?
+
+  fcmSentAt DateTime?
+
+  @@index([recipientId, isRead, type])
+  @@index([fcmSentAt])
+}
+
+model PostSearch {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  user          User     @relation(fields: [userId], references: [id])
+  searchQuery   String   @map("search_query") @db.VarChar(255)
+  searchFilters Json     @default("{}") @map("search_filters") @db.Json
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("post_searches")
+}
+
+model PostRating {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  rating    Int      @db.SmallInt
+  userId    String   @map("user_id") @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+  @@index([postId])
+  @@index([userId])
+  @@map("post_ratings")
+}
