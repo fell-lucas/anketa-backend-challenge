@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { StatefulHealthCheckModule } from '@repo/system/health/stateful/stateful.module';
 import { StatelessHealthCheckModule } from '@repo/system/health/stateless/stateless.module';
+import { CommentModule } from './content/comment/comment.module';
 import { ModerationModule } from './content/moderation/moderation.module';
+import { PostModule } from './content/post/post.module';
 import { ReportModule } from './content/reports/report.module';
 import { IamModule } from './iam/iam.module';
 import { PlatformVariableModule } from './iam/platform-variable/platform-variable.module';
@@ -15,6 +17,8 @@ import { SeedsModule } from './seeds/seeds.module';
     IamModule,
     ReportModule,
     ModerationModule,
+    PostModule,
+    CommentModule,
     StatelessHealthCheckModule,
     StatefulHealthCheckModule,
     PlatformVariableModule,
