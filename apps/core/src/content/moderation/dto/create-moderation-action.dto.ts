@@ -1,6 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ModerationActionType, ModerationSuspensionLevel } from '@prisma/client';
-import { IsEnum, IsOptional, IsString, IsDateString, ValidateIf } from 'class-validator';
+import {
+  ModerationActionType,
+  ModerationSuspensionLevel,
+} from '@prisma/client';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsDateString,
+  ValidateIf,
+} from 'class-validator';
 
 export class CreateModerationActionDto {
   @ApiProperty({ enum: ModerationActionType, enumName: 'ModerationActionType' })
@@ -27,9 +36,15 @@ export class CreateModerationActionDto {
   @IsString()
   violationSubcategory?: string;
 
-  @ApiPropertyOptional({ enum: ModerationSuspensionLevel, enumName: 'ModerationSuspensionLevel' })
+  @ApiPropertyOptional({
+    enum: ModerationSuspensionLevel,
+    enumName: 'ModerationSuspensionLevel',
+  })
   @ValidateIf((o) =>
-    [ModerationActionType.SUSPEND_REPORTED_SUBJECT, ModerationActionType.SUSPEND_USER].includes(o.type),
+    [
+      ModerationActionType.SUSPEND_REPORTED_SUBJECT,
+      ModerationActionType.SUSPEND_USER,
+    ].includes(o.type),
   )
   @IsEnum(ModerationSuspensionLevel)
   suspensionLevel?: ModerationSuspensionLevel;

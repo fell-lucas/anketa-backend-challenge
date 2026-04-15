@@ -1,11 +1,9 @@
-import { Logger } from '@nestjs/common';
 import { EventSchemas, Inngest } from 'inngest';
 import { NestInngest } from 'nest-inngest';
 import { z } from 'zod';
 
 // This will be used by the service implementations
 export const createInngestClient = () => {
-  const logger = new Logger('Inngest');
   return new Inngest({
     id: 'anketa',
     // https://www.inngest.com/docs/reference/client/create#defining-event-payload-types

@@ -118,7 +118,7 @@ export class StreamTestService implements OnModuleInit {
       },
 
       // Mimic the deleteUser method
-      deleteUser: (userId: string, options: any) => {
+      deleteUser: (userId: string, _options: any) => {
         if (this.mockUsers.has(userId)) {
           this.mockUsers.delete(userId);
           return Promise.resolve({ user: { id: userId } });

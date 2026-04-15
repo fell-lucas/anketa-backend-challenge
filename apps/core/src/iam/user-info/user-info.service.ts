@@ -9,7 +9,7 @@ export class UserInfoService {
   async updateProfileInformation(userId: string, data: UpdateProfileInfoDto) {
     // Filter out undefined values
     const filteredData = Object.fromEntries(
-      Object.entries(data).filter(([_, v]) => v !== undefined),
+      Object.entries(data).filter(([, v]) => v !== undefined),
     );
 
     // Check if user profile information exists

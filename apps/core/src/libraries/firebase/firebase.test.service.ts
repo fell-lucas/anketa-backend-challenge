@@ -52,7 +52,7 @@ export class FirebaseTestService {
 
   async verifyIdToken(
     token: string,
-    checkRevoked = false,
+    _checkRevoked = false,
   ): Promise<firebaseAdmin.auth.DecodedIdToken> {
     const user = FirebaseTestService.users.find((user) => user.token === token);
     if (!user) {
@@ -79,11 +79,13 @@ export class FirebaseTestService {
     user.deletedAt = new Date();
   }
 
-  async sendFCMNotification(message: Message): Promise<string> {
+  async sendFCMNotification(_message: Message): Promise<string> {
     return '123';
   }
 
-  async sendFCMNotificationsBatch(messages: Message[]): Promise<BatchResponse> {
+  async sendFCMNotificationsBatch(
+    _messages: Message[],
+  ): Promise<BatchResponse> {
     return {
       successCount: 1,
       failureCount: 0,

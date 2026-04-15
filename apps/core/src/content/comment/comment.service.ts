@@ -8,11 +8,16 @@ export class CommentService {
 
   constructor(private readonly dbService: DbService) {}
 
-  async findByPostId(postId: string, options: { skip?: number; take?: number }) {
+  async findByPostId(
+    postId: string,
+    options: { skip?: number; take?: number },
+  ) {
     const { skip = 0, take = 24 } = options;
 
     // Verify post exists and is not hidden
-    const post = await this.dbService.post.findUnique({ where: { id: postId } });
+    const post = await this.dbService.post.findUnique({
+      where: { id: postId },
+    });
     if (!post || post.hiddenAt) {
       throw new NotFoundException('Post not found');
     }

@@ -15,7 +15,10 @@ import { DbService } from 'src/libraries/db/db.service';
 import { CreateModerationActionDto } from './dto/create-moderation-action.dto';
 
 // Valid state transitions
-const ALLOWED_ACTIONS: Record<ReportedSubjectModerationStatus, ModerationActionType[]> = {
+const ALLOWED_ACTIONS: Record<
+  ReportedSubjectModerationStatus,
+  ModerationActionType[]
+> = {
   [ReportedSubjectModerationStatus.PENDING_REVIEW]: [
     ModerationActionType.ESCALATE,
     ModerationActionType.DISMISS,
@@ -52,9 +55,7 @@ const ALLOWED_ACTIONS: Record<ReportedSubjectModerationStatus, ModerationActionT
     ModerationActionType.UNSUSPEND_REPORTED_SUBJECT,
     ModerationActionType.UNSUSPEND_USER,
   ],
-  [ReportedSubjectModerationStatus.RESOLVED]: [
-    ModerationActionType.REOPEN,
-  ],
+  [ReportedSubjectModerationStatus.RESOLVED]: [ModerationActionType.REOPEN],
 };
 
 @Injectable()
@@ -132,8 +133,12 @@ export class ModerationService {
           violationCategory: dto.violationCategory,
           violationSubcategory: dto.violationSubcategory,
           suspensionLevel: dto.suspensionLevel,
-          suspensionStartsAt: dto.suspensionStartsAt ? new Date(dto.suspensionStartsAt) : undefined,
-          suspensionEndsAt: dto.suspensionEndsAt ? new Date(dto.suspensionEndsAt) : undefined,
+          suspensionStartsAt: dto.suspensionStartsAt
+            ? new Date(dto.suspensionStartsAt)
+            : undefined,
+          suspensionEndsAt: dto.suspensionEndsAt
+            ? new Date(dto.suspensionEndsAt)
+            : undefined,
         },
       });
 
@@ -184,7 +189,9 @@ export class ModerationService {
     });
   }
 
-  private getNewStatus(actionType: ModerationActionType): ReportedSubjectModerationStatus {
+  private getNewStatus(
+    actionType: ModerationActionType,
+  ): ReportedSubjectModerationStatus {
     switch (actionType) {
       case ModerationActionType.ESCALATE:
         return ReportedSubjectModerationStatus.ESCALATED;
@@ -228,7 +235,10 @@ export class ModerationService {
         break;
 
       case ModerationActionType.SUSPEND_REPORTED_SUBJECT: {
-        const suspensionEnd = this.computeSuspensionEnd(dto.suspensionLevel, dto.suspensionEndsAt);
+        const suspensionEnd = this.computeSuspensionEnd(
+          dto.suspensionLevel,
+          dto.suspensionEndsAt,
+        );
 
         if (subject.type === ReportedSubjectType.POST) {
           effects.push(async (tx) => {
@@ -268,14 +278,20 @@ export class ModerationService {
       }
 
       case ModerationActionType.SUSPEND_USER: {
-        const suspensionEnd = this.computeSuspensionEnd(dto.suspensionLevel, dto.suspensionEndsAt);
+        const suspensionEnd = this.computeSuspensionEnd(
+          dto.suspensionLevel,
+          dto.suspensionEndsAt,
+        );
         let targetUserId: string | null = null;
 
         if (subject.type === ReportedSubjectType.USER) {
           targetUserId = subject.userId;
         } else if (subject.type === ReportedSubjectType.POST && subject.post) {
           targetUserId = subject.post.createdByUserId;
-        } else if (subject.type === ReportedSubjectType.COMMENT && subject.comment) {
+        } else if (
+          subject.type === ReportedSubjectType.COMMENT &&
+          subject.comment
+        ) {
           targetUserId = subject.comment.userId;
         }
 
@@ -313,7 +329,11 @@ export class ModerationService {
           effects.push(async (tx) => {
             await tx.user.update({
               where: { id: subject.userId },
-              data: { suspendedAt: null, suspendedUntil: null, suspensionReason: null },
+              data: {
+                suspendedAt: null,
+                suspendedUntil: null,
+                suspensionReason: null,
+              },
             });
           });
         }
@@ -327,7 +347,10 @@ export class ModerationService {
           targetUserId = subject.userId;
         } else if (subject.type === ReportedSubjectType.POST && subject.post) {
           targetUserId = subject.post.createdByUserId;
-        } else if (subject.type === ReportedSubjectType.COMMENT && subject.comment) {
+        } else if (
+          subject.type === ReportedSubjectType.COMMENT &&
+          subject.comment
+        ) {
           targetUserId = subject.comment.userId;
         }
 
@@ -335,7 +358,11 @@ export class ModerationService {
           effects.push(async (tx) => {
             await tx.user.update({
               where: { id: targetUserId },
-              data: { suspendedAt: null, suspendedUntil: null, suspensionReason: null },
+              data: {
+                suspendedAt: null,
+                suspendedUntil: null,
+                suspensionReason: null,
+              },
             });
           });
         }

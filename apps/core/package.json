@@ -11,6 +11,7 @@
     "prisma:seed": "[ \"$RAILWAY_ENVIRONMENT_NAME\" = \"staging\" ] || [ \"$RAILWAY_ENVIRONMENT_NAME\" = \"integration\" ] ] && prisma db seed",
     "prisma:seed:production": "npx ts-node ./prisma/productionSeeds.ts",
     "prisma:seed:dynamic": "npx ts-node ./prisma/dynamicSeeds.ts",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "dev": "npm run start:dev",
     "start": "nest start",

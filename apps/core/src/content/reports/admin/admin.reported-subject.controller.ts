@@ -18,7 +18,9 @@ export class AdminReportedSubjectController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a reported subject with all reports and moderation actions' })
+  @ApiOperation({
+    summary: 'Get a reported subject with all reports and moderation actions',
+  })
   async findReportedSubject(@Param('id') id: string) {
     return this.reportService.findReportedSubjectById(id);
   }
