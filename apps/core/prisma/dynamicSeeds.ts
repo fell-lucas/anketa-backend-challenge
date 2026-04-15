@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import { ChannelSeeds } from '../src/engadgement/channel/channel.seeds';
+import { ChannelSeeds } from '../src/seeds/channel.seeds';
 import { DbService } from '../src/libraries/db/db.service';
-import { ActivityPointsSeeds } from '../src/engadgement/activity-points/activity-points.seeds';
+import { ActivityPointsSeeds } from '../src/seeds/activity-points.seeds';
 
 const prisma = new PrismaClient();
 
