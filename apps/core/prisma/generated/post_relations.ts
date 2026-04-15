@@ -13,6 +13,7 @@ import { PostBookmark } from './post_bookmark';
 import { Notification } from './notification';
 import { AIPostSummary } from './ai_post_summary';
 import { PostRating } from './post_rating';
+import { ReportedSubject } from './reported_subject';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class PostRelations {
@@ -60,4 +61,7 @@ export class PostRelations {
 
   @ApiProperty({ isArray: true, type: () => PostRating })
   postRatings: PostRating[];
+
+  @ApiProperty({ isArray: true, type: () => ReportedSubject })
+  reportedSubjects: ReportedSubject[];
 }

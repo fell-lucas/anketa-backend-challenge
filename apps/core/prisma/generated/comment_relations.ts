@@ -3,6 +3,7 @@ import { Post } from './post';
 import { Comment } from './comment';
 import { Like } from './like';
 import { Notification } from './notification';
+import { ReportedSubject } from './reported_subject';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CommentRelations {
@@ -23,4 +24,7 @@ export class CommentRelations {
 
   @ApiProperty({ isArray: true, type: () => Notification })
   notifications: Notification[];
+
+  @ApiProperty({ isArray: true, type: () => ReportedSubject })
+  reportedSubjects: ReportedSubject[];
 }
