@@ -158,8 +158,8 @@ export class ModerationService {
         await effect(tx);
       }
 
-      // If DISMISS, mark all reports as reviewed
-      if (dto.type === ModerationActionType.DISMISS) {
+      // Mark all reports as reviewed when the subject is resolved
+      if (newStatus === ReportedSubjectModerationStatus.RESOLVED) {
         await tx.report.updateMany({
           where: { reportedSubjectId: subject.id },
           data: { hasBeenReviewed: true },

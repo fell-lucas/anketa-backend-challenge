@@ -283,5 +283,82 @@ describe('Moderation (e2e)', () => {
       expect(res.body.length).toBe(1);
       expect(res.body[0].type).toBe('ESCALATE');
     });
+
+    it('should mark a reported post as sensitive', async () => {
+      const postSeeds = test.get(PostSeeds);
+      const subjectId = await createReportAndGetSubjectId(test, TEST_USER_2, {
+        type: 'flagAsSensitive',
+        postId: postSeeds.publishedPost.id,
+      });
+
+      const res = await test
+        .request(TEST_ADMIN_1)
+        .post(`/brainbox/reported-subjects/${subjectId}/actions`)
+        .send({ type: 'MARK_AS_SENSITIVE', reason: 'Graphic content' });
+      expectStatus(res, 201);
+
+      // Verify the post is marked as sensitive
+      const post = await test.prismaService.post.findUnique({
+        where: { id: postSeeds.publishedPost.id },
+      });
+      expect(post.hasSensitiveContent).toBe(true);
+
+      // Verify reports are marked as reviewed (resolving action)
+      const subjectRes = await test
+        .request(TEST_ADMIN_1)
+        .get(`/brainbox/reported-subjects/${subjectId}`);
+      expect(subjectRes.body.moderationStatus).toBe('RESOLVED');
+      expect(subjectRes.body.reports[0].hasBeenReviewed).toBe(true);
+    });
+
+    it('should unsuspend the user who authored a reported post', async () => {
+      const postSeeds = test.get(PostSeeds);
+      const subjectId = await createReportAndGetSubjectId(test, TEST_USER_2, {
+        type: 'hateSpeech',
+        postId: postSeeds.publishedPost.id,
+      });
+
+      // Suspend the user
+      await test
+        .request(TEST_ADMIN_1)
+        .post(`/brainbox/reported-subjects/${subjectId}/actions`)
+        .send({
+          type: 'SUSPEND_USER',
+          reason: 'Violation',
+          suspensionLevel: 'TEMPORARY_1_DAY',
+        });
+
+      // Verify suspended
+      let user = await test.prismaService.user.findUnique({
+        where: { id: TEST_USER_1.appId },
+      });
+      expect(user.suspendedAt).not.toBeNull();
+
+      // Reopen (RESOLVED → PENDING_REVIEW)
+      await test
+        .request(TEST_ADMIN_1)
+        .post(`/brainbox/reported-subjects/${subjectId}/actions`)
+        .send({ type: 'REOPEN' });
+
+      // Escalate (PENDING_REVIEW → ESCALATED, which allows UNSUSPEND_USER)
+      await test
+        .request(TEST_ADMIN_1)
+        .post(`/brainbox/reported-subjects/${subjectId}/actions`)
+        .send({ type: 'ESCALATE' });
+
+      // Unsuspend user
+      const res = await test
+        .request(TEST_ADMIN_1)
+        .post(`/brainbox/reported-subjects/${subjectId}/actions`)
+        .send({ type: 'UNSUSPEND_USER' });
+      expectStatus(res, 201);
+
+      // Verify user is no longer suspended
+      user = await test.prismaService.user.findUnique({
+        where: { id: TEST_USER_1.appId },
+      });
+      expect(user.suspendedAt).toBeNull();
+      expect(user.suspensionReason).toBeNull();
+    });
   });
 });
