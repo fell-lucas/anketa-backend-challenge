@@ -8,6 +8,7 @@
       "outputs": ["dist/**", ".adminjs/**"]
     },
     "lint": {},
+    "typecheck": {},
     "dev": {
       "cache": false,
       "persistent": true
