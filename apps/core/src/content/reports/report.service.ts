@@ -1,8 +1,22 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ReportedSubjectModerationStatus, ReportedSubjectType, Prisma } from '@prisma/client';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  ReportedSubjectModerationStatus,
+  ReportedSubjectType,
+  Prisma,
+} from '@prisma/client';
 import { DbService } from 'src/libraries/db/db.service';
 import { CreateReportDto } from './dto/create-report.dto';
-import { FindReportedSubjectsDto, FindReportsDto } from './dto/find-reports.dto';
+import {
+  FindReportedSubjectsDto,
+  FindReportsDto,
+} from './dto/find-reports.dto';
 
 @Injectable()
 export class ReportService {
@@ -72,9 +86,15 @@ export class ReportService {
     // Find or create ReportedSubject
     const subjectWhere: Prisma.ReportedSubjectWhereInput = {
       type: subjectType,
-      ...(subjectType === ReportedSubjectType.USER && { userId: subjectEntityId }),
-      ...(subjectType === ReportedSubjectType.POST && { postId: subjectEntityId }),
-      ...(subjectType === ReportedSubjectType.COMMENT && { commentId: subjectEntityId }),
+      ...(subjectType === ReportedSubjectType.USER && {
+        userId: subjectEntityId,
+      }),
+      ...(subjectType === ReportedSubjectType.POST && {
+        postId: subjectEntityId,
+      }),
+      ...(subjectType === ReportedSubjectType.COMMENT && {
+        commentId: subjectEntityId,
+      }),
     };
 
     let reportedSubject = await this.dbService.reportedSubject.findFirst({
@@ -86,9 +106,15 @@ export class ReportService {
         data: {
           type: subjectType,
           moderationStatus: ReportedSubjectModerationStatus.PENDING_REVIEW,
-          ...(subjectType === ReportedSubjectType.USER && { userId: subjectEntityId }),
-          ...(subjectType === ReportedSubjectType.POST && { postId: subjectEntityId }),
-          ...(subjectType === ReportedSubjectType.COMMENT && { commentId: subjectEntityId }),
+          ...(subjectType === ReportedSubjectType.USER && {
+            userId: subjectEntityId,
+          }),
+          ...(subjectType === ReportedSubjectType.POST && {
+            postId: subjectEntityId,
+          }),
+          ...(subjectType === ReportedSubjectType.COMMENT && {
+            commentId: subjectEntityId,
+          }),
           reportsCount: 0,
         },
       });
@@ -121,8 +147,12 @@ export class ReportService {
         data: {
           reportsCount: { increment: 1 },
           // Reopen if resolved and new report comes in
-          ...(reportedSubject.moderationStatus === ReportedSubjectModerationStatus.RESOLVED
-            ? { moderationStatus: ReportedSubjectModerationStatus.PENDING_REVIEW }
+          ...(reportedSubject.moderationStatus ===
+          ReportedSubjectModerationStatus.RESOLVED
+            ? {
+                moderationStatus:
+                  ReportedSubjectModerationStatus.PENDING_REVIEW,
+              }
             : {}),
         },
       }),

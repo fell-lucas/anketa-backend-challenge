@@ -1,5 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ReportedSubjectModerationStatus, ReportedSubjectType } from '@prisma/client';
+import {
+  ReportedSubjectModerationStatus,
+  ReportedSubjectType,
+} from '@prisma/client';
 import { IsEnum, IsOptional, IsInt, Min, Max, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 
