@@ -66,7 +66,6 @@ describe('AuthController (e2e)', () => {
 
       // Check that welcome email was sent
       const awsService = test.get(AwsService) as any as AwsTestService;
-      const name = TEST_USER_NOT_REGISTERED.name;
       expect(awsService.sentEmails).toHaveLength(1);
       expect(awsService.sentEmails[0]).toMatchObject({
         to: TEST_USER_NOT_REGISTERED.email,

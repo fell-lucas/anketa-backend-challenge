@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Module } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { AdminService } from 'src/iam/admin/admin.service';

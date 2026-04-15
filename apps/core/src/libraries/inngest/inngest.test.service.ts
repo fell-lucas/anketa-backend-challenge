@@ -142,7 +142,7 @@ export class InngestTestService {
       },
       step: {
         // Mock step functions that Inngest provides
-        run: async (name: string, fn: Function) => fn(),
+        run: async (name: string, fn: () => unknown) => fn(),
         sleep: async (duration: string) => {
           // Mock sleep - in real tests you might want to actually wait
           this.logger.debug(`Mock sleep: ${duration}`);

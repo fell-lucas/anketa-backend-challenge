@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-ts-comment */
 // Here we can configure the look and feel of the admin panels:
 
 // @ts-nocheck needed because they are mjs but we need only the types

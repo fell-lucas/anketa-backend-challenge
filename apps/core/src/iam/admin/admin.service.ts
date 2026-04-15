@@ -10,8 +10,6 @@ import { UserJwt } from '../auth/user.jwt';
 import {
   AppUnauthorizedException,
   ExceptionUnauthorizedEnum,
-  UserError,
-  UserErrorsEnum,
 } from '@repo/system/errors/global.exceptions';
 
 @Injectable()

@@ -6,7 +6,7 @@ import { UserSeeds } from '../user.seeds';
 
 describe('AdminUserController (e2e)', () => {
   const test = new TestUtils(AppModule)
-    .withModuleOverrides(async (module) => {})
+    .withModuleOverrides(async () => {})
     .withDatabase([UserSeeds]);
 
   describe('GET /brainbox/users', () => {
