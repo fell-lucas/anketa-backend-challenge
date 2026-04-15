@@ -69,6 +69,10 @@ jest reports
 
 # Exercise
 
+## Implementation Summary
+
+Implemented all exercise requirements: Prisma schema with enums/models, user and admin reporting endpoints, admin moderation with a full state machine (all 9 action types across 5 statuses), and 22 e2e tests using the existing TestContainers infrastructure. Added minimal post/comment listing endpoints to demonstrate hidden-content filtering for suspended items. Beyond scope: replaced the repo's broken CI with a working GitHub Actions workflow (lint, typecheck, e2e tests), added `typecheck` scripts via Turbo, and fixed 20 pre-existing lint errors.
+
 ## Implement Reports & Moderation on Posts & Comments
 
 ## Context
