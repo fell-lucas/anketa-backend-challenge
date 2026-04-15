@@ -25,6 +25,8 @@ import { UserActivityLog } from './user_activity_log';
 import { PostSearch } from './post_search';
 import { PostRating } from './post_rating';
 import { UserAwardedTokens } from './user_awarded_tokens';
+import { ReportedSubject } from './reported_subject';
+import { Report } from './report';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 
 export class UserRelations {
@@ -123,4 +125,10 @@ export class UserRelations {
 
   @ApiProperty({ isArray: true, type: () => UserAwardedTokens })
   userAwardedTokens: UserAwardedTokens[];
+
+  @ApiProperty({ isArray: true, type: () => ReportedSubject })
+  reportedSubjects: ReportedSubject[];
+
+  @ApiProperty({ isArray: true, type: () => Report })
+  reports: Report[];
 }

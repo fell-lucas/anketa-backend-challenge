@@ -38,9 +38,9 @@ export class ReportedSubject {
   @ApiPropertyOptional({ type: String })
   activeModerationId?: string;
 
+  @ApiPropertyOptional({ type: String })
+  latestModerationActionId?: string;
+
   @ApiProperty({ type: Number })
   reportsCount: number;
-
-  @ApiPropertyOptional({ type: String })
-  activeModerationActionId?: string;
 }

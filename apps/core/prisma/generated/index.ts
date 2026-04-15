@@ -25,6 +25,10 @@ import { PlatformVariablesRelations as _PlatformVariablesRelations } from './pla
 import { AIAnswerSummaryRelations as _AIAnswerSummaryRelations } from './ai_answer_summary_relations';
 import { AIPostSummaryRelations as _AIPostSummaryRelations } from './ai_post_summary_relations';
 import { MediaRelations as _MediaRelations } from './media_relations';
+import { ReportedSubjectRelations as _ReportedSubjectRelations } from './reported_subject_relations';
+import { ReportRelations as _ReportRelations } from './report_relations';
+import { ReportedSubjectModerationRelations as _ReportedSubjectModerationRelations } from './reported_subject_moderation_relations';
+import { ModerationActionRelations as _ModerationActionRelations } from './moderation_action_relations';
 import { PollOptionRelations as _PollOptionRelations } from './poll_option_relations';
 import { PollRelations as _PollRelations } from './poll_relations';
 import { PostRelations as _PostRelations } from './post_relations';
@@ -65,6 +69,10 @@ import { PlatformVariables as _PlatformVariables } from './platform_variables';
 import { AIAnswerSummary as _AIAnswerSummary } from './ai_answer_summary';
 import { AIPostSummary as _AIPostSummary } from './ai_post_summary';
 import { Media as _Media } from './media';
+import { ReportedSubject as _ReportedSubject } from './reported_subject';
+import { Report as _Report } from './report';
+import { ReportedSubjectModeration as _ReportedSubjectModeration } from './reported_subject_moderation';
+import { ModerationAction as _ModerationAction } from './moderation_action';
 import { PollOption as _PollOption } from './poll_option';
 import { Poll as _Poll } from './poll';
 import { Post as _Post } from './post';
@@ -107,6 +115,10 @@ export namespace PrismaModel {
   export class AIAnswerSummaryRelations extends _AIAnswerSummaryRelations {}
   export class AIPostSummaryRelations extends _AIPostSummaryRelations {}
   export class MediaRelations extends _MediaRelations {}
+  export class ReportedSubjectRelations extends _ReportedSubjectRelations {}
+  export class ReportRelations extends _ReportRelations {}
+  export class ReportedSubjectModerationRelations extends _ReportedSubjectModerationRelations {}
+  export class ModerationActionRelations extends _ModerationActionRelations {}
   export class PollOptionRelations extends _PollOptionRelations {}
   export class PollRelations extends _PollRelations {}
   export class PostRelations extends _PostRelations {}
@@ -147,6 +159,10 @@ export namespace PrismaModel {
   export class AIAnswerSummary extends _AIAnswerSummary {}
   export class AIPostSummary extends _AIPostSummary {}
   export class Media extends _Media {}
+  export class ReportedSubject extends _ReportedSubject {}
+  export class Report extends _Report {}
+  export class ReportedSubjectModeration extends _ReportedSubjectModeration {}
+  export class ModerationAction extends _ModerationAction {}
   export class PollOption extends _PollOption {}
   export class Poll extends _Poll {}
   export class Post extends _Post {}
@@ -189,6 +205,10 @@ export namespace PrismaModel {
     AIAnswerSummaryRelations,
     AIPostSummaryRelations,
     MediaRelations,
+    ReportedSubjectRelations,
+    ReportRelations,
+    ReportedSubjectModerationRelations,
+    ModerationActionRelations,
     PollOptionRelations,
     PollRelations,
     PostRelations,
@@ -229,6 +249,10 @@ export namespace PrismaModel {
     AIAnswerSummary,
     AIPostSummary,
     Media,
+    ReportedSubject,
+    Report,
+    ReportedSubjectModeration,
+    ModerationAction,
     PollOption,
     Poll,
     Post,

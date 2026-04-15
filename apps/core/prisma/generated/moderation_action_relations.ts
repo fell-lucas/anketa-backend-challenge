@@ -10,5 +10,5 @@ export class ModerationActionRelations {
   moderation: ReportedSubjectModeration;
 
   @ApiPropertyOptional({ type: () => ReportedSubject })
-  activeForReportedSubject?: ReportedSubject;
+  latestForReportedSubject?: ReportedSubject;
 }
